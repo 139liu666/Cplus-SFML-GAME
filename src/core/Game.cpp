@@ -1,4 +1,18 @@
-#pragma once
+/*
+* This section is the main code that controls the gameplay and
+* is responsible for updating the state in real time
+*/
+/*
+* --This game uses two design patterns: 
+    Factory pattern and Composite pattern.
+  --In this design, Map serves as an abstract base class or interface that defines the general characteristics of map terrain.
+    Different types of terrain inherit from Map and implement their own specific behaviors.
+  --Each large map object (Map) is treated as a composite node (Composite), which contains multiple terrain objects (Terrain), 
+    and each terrain object contains its corresponding texture object (Texture), forming a hierarchical composite system. 
+	These elements (map, terrain, texture) all implement the same unified interface.
+* --Since the basic map data is simple, vector format was used directly instead of XML format.
+* --This code additionally uses the ImGui library for graphical user interface.
+*/
 #include <iostream>
 #include "Game.h"
 #include <string>
@@ -6,30 +20,44 @@
 #include "mapManager.h"
 
 using namespace std;
-constexpr sf::Time Game::TimePerFrame = sf::seconds(1.f / 60.f); 
+constexpr sf::Time Game::TimePerFrame = sf::seconds(1.f / 60.f); //Frame limite
 
 
 Game::Game():
 	view(sf::FloatRect({ 0.f, 0.f }, { WIDTH, HEIGHT })) ,
+	//set the menu
 	menuTexture("resources/menu.png"),
 	menu{menuTexture},
 	mFont("resources/font.ttf"),
-	Level(1),
+	mMu("resources/font.ttf"),
+	Level(0),
 	numTool(0){
-	mText.setPosition({100.f,10.f});
+	//set the text in the game
+	mText.setPosition({100.f,10.f});//Level information
 	mText.setCharacterSize(20);
 	mText.setFillColor(sf::Color::Black);
+
+	tMu.setPosition({ 100.f,40.f });//menu text
+	tMu.setString("Evolution");
+	tMu.setCharacterSize(80);
+	tMu.setFillColor(sf::Color::Yellow);
+	tMu.setOutlineThickness(1.f);
+	tMu.setOutlineColor(sf::Color::Black);
+
 	view.setCenter({ WIDTH / 2.f, HEIGHT / 2.f });
 	window.setView(view);
 }
+//This part updates map information based on the current level.
 void Game::initScene() {
 	step.clear();
+	//main map create
 	map.updateMap(Level);
 	map.initMap();
 	map.createMap();
 
 	tool.create();
 
+	//this is to create the relevant map according to the level
 	if (Level == 1) {
 		for (int i = 0; i < 4; i++) {
 			auto mapSet = make_unique<Step>("resources/wood.png");
@@ -86,22 +114,30 @@ void Game::initScene() {
 		s->createMap();
 	}
 }
+//Main game logic
 void Game::run() {
+	//fixed frame step
 	sf::Clock clock;
 	sf::Time timeSinceLastUpdate = sf::Time::Zero;
 	window.setVerticalSyncEnabled(true);
+	//Init the GUI
+	if (!ImGui::SFML::Init(window)) exit(1);
+	//Check the window
 	while (window.isOpen()) {
 		sf::Time elapsedTime = clock.restart();
 		timeSinceLastUpdate += elapsedTime;
+		//update
 		while (timeSinceLastUpdate > TimePerFrame) {
 			timeSinceLastUpdate -= TimePerFrame;
 			processEvents();
+			//Handling map updates
 			fin.Collision(role);
 			if (role.getState()&&Level!=0&&Level<3) {
 				Level++;
 				initScene();
 				role.setState(false);
 			}
+			
 			update(TimePerFrame);
 		}
 		updateStatistics();
@@ -110,6 +146,7 @@ void Game::run() {
 }
 void Game::processEvents() {
 	while (const std::optional event = window.pollEvent()) {
+		ImGui::SFML::ProcessEvent(window,*event);
 		if (event->is<sf::Event::Closed>()) {
 			window.close();
 		}
@@ -120,12 +157,18 @@ void Game::processEvents() {
 	}
 }
 void Game::update(sf::Time elapsedTime) {
-	if (tool.Collision(role)&&numTool<NUMTOOL) {
-		numTool++;
-	}
-	monster.move(elapsedTime);
-	monster.Collision(role);
 	if (Level) {
+		//Check the collision with the tool
+		if (tool.Collision(role) && numTool < NUMTOOL) {
+			numTool++;
+		}
+		monster.move(elapsedTime);
+		//Check the collision with the monster
+		if (monster.Collision(role)) {
+			view.setCenter({ WIDTH / 2.f, view.getCenter().y });
+			window.setView(view);
+		}
+		//Check the collision with the map
 		unsigned char isContact = 0;
 		for (const auto& s : step) {
 			isContact = s->checkCollision(role.getBoundBox());
@@ -153,7 +196,7 @@ void Game::update(sf::Time elapsedTime) {
 }
 void Game::render() {
 	window.clear(sf::Color::Cyan);
-	if (Level) {
+	if (Level) {//game level render
 		map.drawMap(window);
 		for (const auto& s : step) {
 			s->drawMap(window);
@@ -164,11 +207,27 @@ void Game::render() {
 		role.draw(window);
 		window.draw(mText);
 	}
-	else{
+	else{//menu render
 		window.draw(menu);
+		window.draw(tMu);
+		//GUI render
+		ImGui::SFML::Update(window, deltaClock.restart());
+		ImGui::SetNextWindowPos(ImVec2(WIDTH/2, HEIGHT/2), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+		ImGui::SetNextWindowSize(ImVec2(200, 100), ImGuiCond_Always);
+		ImGui::Begin("Menu");
+		if (ImGui::Button("Start")) {
+			Level++;
+			initScene();
+		}
+		if (ImGui::Button("End")) {
+			exit(0);
+		}
+		ImGui::End();
+		ImGui::SFML::Render(window);
 	}
 	window.display();
 }
+//the info about the level
 void Game::updateStatistics() {
 	mText.setString(format("Level: {}/3 \t Tool Number: {}/{}", Level, numTool,NUMTOOL));
 }

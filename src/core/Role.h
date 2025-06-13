@@ -1,5 +1,7 @@
-// This part is to create a role in the game
-// This character is the one I'm controlling to break in.
+/*
+* This part is to create a role in the game
+* This character is the one I'm controlling to break in.
+*/
 #pragma once
 #include<vector>
 #include <SFML/Graphics.hpp>
@@ -9,7 +11,7 @@ public:
 	Role();
 	void draw(sf::RenderWindow& window) const;
 	void update(const sf::Time& elapsedTime, unsigned char isGround, unsigned char isContact);
-	sf::Sprite getSprite() const;
+	sf::Sprite& getSprite() ;
 	sf::FloatRect getBoundBox() const;
 	bool getState() const;
 	void setState(bool state);

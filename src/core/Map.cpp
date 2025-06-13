@@ -1,10 +1,18 @@
+/*
+* This section includes interactive elements in the game
+* including items that can be picked up and monsters that can be attacked.
+*/
 #include "Map.h"
 #include "Global.h"
 
+/*
+* The end point of the current level in the game.
+*/
 Fin::Fin() :
 finTexture("resources/fin.png"),
 finSprite{finTexture} {
-	finSprite.setPosition({0,HEIGHT-3*CEILSIZE});
+	//Place the Fin in the end of map
+	finSprite.setPosition({MAPWIDTH*CEILSIZE-CEILSIZE,HEIGHT-3*CEILSIZE});
 }
 void Fin::draw(sf::RenderWindow& window) const {
 	window.draw(finSprite);
@@ -13,6 +21,7 @@ void Fin::Collision(Role &role) const{
 	sf::FloatRect boundBox = role.getBoundBox();
 	sf::FloatRect finBound = finSprite.getGlobalBounds();
 	if (const std::optional intersection = finBound.findIntersection(boundBox)) {
+		//if collision:reset the position of the role and set the next level
 		role.setState(true);
 		role.restart();
 	}
@@ -46,6 +55,7 @@ bool Tool::Collision(const Role& role) {
 	for (auto it = ceilSprite.begin(); it != ceilSprite.end(); it++) {
 		sf::FloatRect bound = it->getGlobalBounds();
 		if (const std::optional intersection = bound.findIntersection(boundBox)) {
+			//if collision ,it can be pick up and be erase
 			ceilSprite.erase(it);
 			return true;
 		}
@@ -68,19 +78,22 @@ void Monster::create() {
 	ceilSprite.clear();
 	for (int i = 0; i < NUMMONSTER; i++) {
 		sf::Sprite sprite{ ceilTexture };
-		sprite.setPosition({ static_cast<float>((i * 5 + offset)) * CEILSIZE,HEIGHT - 2 * CEILSIZE });
+		sprite.setPosition({ static_cast<float>((i * 5 + offset)) * CEILSIZE,HEIGHT - 3 * CEILSIZE });
 		ceilSprite.push_back(sprite);
 	}
 }
-void Monster::Collision(Role& role) {
+bool Monster::Collision(Role& role) {
 	sf::FloatRect boundBox = role.getBoundBox();
 	for (auto it = ceilSprite.begin(); it != ceilSprite.end(); it++) {
 		sf::FloatRect bound = it->getGlobalBounds();
 		if (const std::optional intersection = bound.findIntersection(boundBox)) {
 			role.restart();
+			return true;
 		}
 	}
+	return false;
 }
+//this is to let the monster can move automaticlly
 void Monster::move(const sf::Time& elapsedTime) {
 	for (auto& cs : ceilSprite) {
 		cs.move(speed*elapsedTime.asSeconds());

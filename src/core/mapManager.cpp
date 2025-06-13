@@ -65,6 +65,7 @@ void Map:: updateMap(int level) {
 }
 //this is to load the data of the map by myself
 void Map:: initMap() {
+    mapData.clear();
     for (int i = 0; i < 2; ++i) {
         std::vector<int> row;
         for (int j = 0; j < MAPWIDTH; ++j) {
@@ -175,6 +176,9 @@ unsigned char Step::checkCollision(sf::FloatRect boundBox) const {
     }
     return flag;
 }
+int Step::getOffset() {
+    return offset;
+}
 
 //*****PlatForm class*****
 //This part is very similar to the previous one.
@@ -249,6 +253,9 @@ unsigned char PlatForm::checkCollision(sf::FloatRect boundBox) const {
         }
     }
     return flag;
+}
+int PlatForm::getOffset() {
+    return offset;
 }
 
 //*****Cloud class*****

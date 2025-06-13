@@ -1,9 +1,9 @@
-#pragma once
 /*
 * This code is to create and operate the element of the map
 * Ground,step,platform;these are elements that can be interacted with,such as collision detection
 * Cloud,tree;these re elements that just background of the scene
 */
+#pragma once
 #include<vector>
 #include<random>
 #include <SFML/Graphics.hpp>
@@ -35,6 +35,7 @@ public:
 	void createMap() override;
 	unsigned char checkCollision(sf::FloatRect boundBox) const override;
 	void initMap() override;
+	int getOffset();
 private:
 	int offset;
 	sf::Texture ceilTexture;
@@ -50,6 +51,7 @@ public:
 	void createMap() override;
 	unsigned char checkCollision(sf::FloatRect boundBox) const override;
 	void initMap() override;
+	int getOffset();
 private:
 	int offset;
 	sf::Texture ceilTexture;

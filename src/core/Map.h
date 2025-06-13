@@ -1,3 +1,7 @@
+/*
+* This section includes interactive elements in the game
+* including items that can be picked up and monsters that can be attacked.
+*/
 #pragma once
 #include<vector>
 #include <SFML/Graphics.hpp>
@@ -42,7 +46,7 @@ public:
 	explicit Monster(const std::filesystem::path& tileset);
 	void draw(sf::RenderWindow& window) const;
 	void create();
-	void Collision(Role& role);
+	bool Collision(Role& role);
 	void move(const sf::Time& elapsedTime);
 private:
 	sf::Vector2f speed{ -3.f,0.f };
