@@ -13,3 +13,4 @@ A Mario-style platform game developed in **C++** using **SFML**.This code additi
  --Each large map object (Map) is treated as a composite node , which contains multiple terrain objects (Terrain), 
     and each terrain object contains its corresponding texture object (Texture), forming a hierarchical composite system.
 	These elements (map, terrain, texture) all implement the same unified interface.   
+##### Author:LIU Peizhe
