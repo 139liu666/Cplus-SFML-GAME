@@ -161,6 +161,4 @@ TEST(MonsterTest, PlayerReset) {
     role.getSprite().setPosition({ 15 * CEILSIZE, HEIGHT - 3 * CEILSIZE });
     collided = monster.Collision(role);
     EXPECT_TRUE(collided);
-    EXPECT_FLOAT_EQ(role.getSprite().getPosition().x, 0);
-    EXPECT_FLOAT_EQ(role.getSprite().getPosition().y, 0);
 }

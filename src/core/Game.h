@@ -31,6 +31,7 @@ private:
 	sf::Font mMu;
 	sf::Text tMu{ mMu };
 	sf::Clock deltaClock;
+	bool isDead{false};
 
 	void processEvents();
 	void render();

@@ -33,7 +33,8 @@ Game::Game():
 	Level(0),
 	numTool(0){
 	//set the text in the game
-	mText.setPosition({100.f,10.f});//Level information
+	sf::Vector2f viewPos = window.mapPixelToCoords(sf::Vector2i(100, 10));
+	mText.setPosition(viewPos);//Level information
 	mText.setCharacterSize(20);
 	mText.setFillColor(sf::Color::Black);
 
@@ -72,8 +73,10 @@ void Game::initScene() {
 		auto tree = make_unique<Tree>("resources/xian.png");
 		step.push_back(std::move(tree));
 		
+		/*
 		monster = Monster("resources/bee.png");
 		monster.create();
+		*/
 	}
 	if (Level == 2) {
 		for (int i = 0; i < 4; i++) {
@@ -89,7 +92,7 @@ void Game::initScene() {
 		auto tree = make_unique<Tree>("resources/tree.png");
 		step.push_back(std::move(tree));
 
-		monster = Monster("resources/huang.png");
+		monster = Monster("resources/bee.png");
 		monster.create();
 	}
 	if (Level == 3) {
@@ -135,6 +138,9 @@ void Game::run() {
 			if (role.getState()&&Level!=0&&Level<3) {
 				Level++;
 				initScene();
+				numTool=0;
+				view.setCenter({ WIDTH / 2.f, view.getCenter().y });
+				window.setView(view);
 				role.setState(false);
 			}
 			
@@ -164,9 +170,8 @@ void Game::update(sf::Time elapsedTime) {
 		}
 		monster.move(elapsedTime);
 		//Check the collision with the monster
-		if (monster.Collision(role)) {
-			view.setCenter({ WIDTH / 2.f, view.getCenter().y });
-			window.setView(view);
+		if (monster.Collision(role)) {// role is death
+			isDead = true;
 		}
 		//Check the collision with the map
 		unsigned char isContact = 0;
@@ -206,6 +211,50 @@ void Game::render() {
 		fin.draw(window);
 		role.draw(window);
 		window.draw(mText);
+		//GUI render
+		if (isDead) {
+			ImGui::SFML::Update(window, deltaClock.restart());
+			ImGui::SetNextWindowPos(ImVec2(WIDTH / 2, HEIGHT / 2), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+			ImGui::SetNextWindowSize(ImVec2(150, 150), ImGuiCond_Always);
+			ImGui::Begin("Game Over", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+			ImGui::Text("You Died!");
+			if (ImGui::Button("Restart", ImVec2(100, 50))) {
+				initScene();
+				role.restart();
+				isDead = false;
+				view.setCenter({ WIDTH / 2.f, view.getCenter().y });
+				window.setView(view);
+			}
+			ImGui::End();
+			ImGui::SFML::Render(window);
+		}
+		else {
+			ImGui::SFML::Update(window, deltaClock.restart());
+			ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+			ImGui::SetNextWindowSize(ImVec2(70, 130), ImGuiCond_Always);
+			ImGui::Begin("Set");
+			//Level choice
+			if (ImGui::Button("Exit")) {
+				Level = 0;
+			}
+			if (ImGui::Button("L1")) {
+				Level = 1;
+				initScene();
+				role.restart();
+			}
+			if (ImGui::Button("L2")) {
+				Level = 2;
+				initScene();
+				role.restart();
+			}
+			if (ImGui::Button("L3")) {
+				Level = 3;
+				initScene();
+				role.restart();
+			}
+			ImGui::End();
+			ImGui::SFML::Render(window);
+		}
 	}
 	else{//menu render
 		window.draw(menu);
@@ -213,13 +262,13 @@ void Game::render() {
 		//GUI render
 		ImGui::SFML::Update(window, deltaClock.restart());
 		ImGui::SetNextWindowPos(ImVec2(WIDTH/2, HEIGHT/2), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-		ImGui::SetNextWindowSize(ImVec2(200, 100), ImGuiCond_Always);
+		ImGui::SetNextWindowSize(ImVec2(150, 150), ImGuiCond_Always);
 		ImGui::Begin("Menu");
-		if (ImGui::Button("Start")) {
+		if (ImGui::Button("Start", ImVec2(100, 50))) {
 			Level++;
 			initScene();
 		}
-		if (ImGui::Button("End")) {
+		if (ImGui::Button("End", ImVec2(100, 50))) {
 			exit(0);
 		}
 		ImGui::End();
@@ -229,5 +278,7 @@ void Game::render() {
 }
 //the info about the level
 void Game::updateStatistics() {
+	sf::Vector2f pos = view.getCenter();
+	mText.setPosition({pos.x-50.f,10.f});
 	mText.setString(format("Level: {}/3 \t Tool Number: {}/{}", Level, numTool,NUMTOOL));
 }

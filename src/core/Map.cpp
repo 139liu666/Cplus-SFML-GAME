@@ -87,7 +87,6 @@ bool Monster::Collision(Role& role) {
 	for (auto it = ceilSprite.begin(); it != ceilSprite.end(); it++) {
 		sf::FloatRect bound = it->getGlobalBounds();
 		if (const std::optional intersection = bound.findIntersection(boundBox)) {
-			role.restart();
 			return true;
 		}
 	}

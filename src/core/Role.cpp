@@ -61,6 +61,9 @@ void Role::update(const sf::Time& elapsedTime, unsigned char isGround, unsigned 
 	if (roleSprite.getPosition().x +width> MAPWIDTH*CEILSIZE) {
 		x = MAPWIDTH * CEILSIZE -width;
 	}
+	if (roleSprite.getPosition().y > HEIGHT) {
+		restart();
+	}
 	roleSprite.setPosition({ x,y });
 	x = roleSprite.getPosition().x;
 	y = roleSprite.getPosition().y;
