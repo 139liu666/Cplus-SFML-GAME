@@ -6,6 +6,8 @@ A Mario-style platform game developed in **C++** using **SFML**.This code additi
 ## GamePlay
  The gameplay involves guiding a character through various levels, each with unique maps and monsters.     
  Players can collect corresponding items—corn—as rewards, and reaching the final level constitutes victory.    
+ Control：A moves left, D moves right, W jumps   
+ Run:Click to generate main.exe to run the project    
 ## Design Pattern
  This game uses two design patterns: **Factory pattern** and **Composite pattern**.    
  --In Factory pattern, Map serves as an abstract base class or interface that defines the general characteristics of map terrain.    
